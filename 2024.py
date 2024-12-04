@@ -4,6 +4,7 @@ import argparse
 from collections import Counter
 from typing import TextIO
 from datetime import datetime
+import re
 
 
 def day1(input_file: TextIO) -> None:
@@ -79,6 +80,34 @@ def day2(input_file: TextIO) -> None:
 
     print("safe count:", safe_count)
     print("safe count (problem dampener):", safe_count2)
+
+
+def day3(input_file: TextIO) -> None:
+
+    text = input_file.read().strip()
+
+    instructions = []
+    instructions.extend(
+        ("mul", m) for m in re.finditer(r"mul\((\d+),(\d+)\)", text, re.MULTILINE)
+    )
+    instructions.extend(("do", m) for m in re.finditer(r"do\(\)", text, re.MULTILINE))
+    instructions.extend(
+        ("dont", m) for m in re.finditer(r"don't\(\)", text, re.MULTILINE)
+    )
+    instructions.sort(key=lambda x: x[1].start())
+
+    mul_enabled = True
+    total = 0
+    for ftype, m in instructions:
+        if ftype == "mul" and mul_enabled:
+            a, b = map(int, m.groups())
+            total += a * b
+        elif ftype == "do":
+            mul_enabled = True
+        elif ftype == "dont":
+            mul_enabled = False
+
+    print("total:", total)
 
 
 if __name__ == "__main__":
